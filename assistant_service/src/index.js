@@ -187,51 +187,72 @@ const normalizeThinking = (value) => {
 };
 
 const ensurePrefixResponseId = async (sessionKey, thinkingType) => {
-  if (!cacheAvailable) return null;
   const cached = getCachedPrefix(sessionKey);
   if (cached?.responseId) {
     cached.updatedAt = Date.now();
     return cached.responseId;
   }
 
-  const payload = {
-    model: ASSISTANT_MODEL,
-    input: [{ role: 'system', content: systemPrompt }],
-    caching: { type: 'enabled', prefix: true },
+  let useCaching = cacheAvailable;
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${ARK_API_KEY}`,
   };
-  if (thinkingType) {
-    payload.thinking = { type: thinkingType };
-  }
 
-  const response = await fetchWithTimeout(responsesUrl, {
+  const buildPayload = () => {
+    const payload = {
+      model: ASSISTANT_MODEL,
+      input: [{ role: 'system', content: systemPrompt }],
+    };
+    if (thinkingType) {
+      payload.thinking = { type: thinkingType };
+    }
+    if (useCaching) {
+      payload.caching = { type: 'enabled', prefix: true };
+    }
+    return payload;
+  };
+
+  let response = await fetchWithTimeout(responsesUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${ARK_API_KEY}`,
-    },
-    body: JSON.stringify(payload),
+    headers,
+    body: JSON.stringify(buildPayload()),
   });
 
   if (!response.ok) {
     const text = await response.text().catch(() => '');
-    if (
+    const isCache403 =
       response.status === 403 &&
-      text.includes('AccessDenied.CacheService')
-    ) {
+      text.includes('AccessDenied.CacheService');
+
+    if (isCache403 && useCaching) {
       cacheAvailable = false;
+      useCaching = false;
       console.warn('[assistant] cache service not enabled, fallback to no-cache');
-      return null;
+      response = await fetchWithTimeout(responsesUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(buildPayload()),
+      });
+      if (!response.ok) {
+        const retryText = await response.text().catch(() => '');
+        throw new Error(
+          `assistant cache warmup failed: ${response.status} ${retryText}`,
+        );
+      }
+    } else {
+      throw new Error(`assistant cache warmup failed: ${response.status} ${text}`);
     }
-    throw new Error(`assistant cache warmup failed: ${response.status} ${text}`);
   }
 
   const data = await response.json();
-  if (!data?.id) {
+  const responseId = extractResponseId(data);
+  if (!responseId) {
     throw new Error('assistant cache warmup failed: missing response id');
   }
 
-  setCachedPrefix(sessionKey, data.id);
-  return data.id;
+  setCachedPrefix(sessionKey, responseId);
+  return responseId;
 };
 
 const extractResponseText = (payload) => {
@@ -254,6 +275,15 @@ const extractUsage = (payload) => {
   return null;
 };
 
+const extractResponseId = (payload) => {
+  if (!payload) return null;
+  if (typeof payload.id === 'string' && payload.id) return payload.id;
+  if (typeof payload.response?.id === 'string' && payload.response.id) {
+    return payload.response.id;
+  }
+  return null;
+};
+
 const parseSseChunk = (chunk) => {
   const lines = chunk.split('\n');
   let event = '';
@@ -268,7 +298,7 @@ const parseSseChunk = (chunk) => {
   return { event, data: dataLines.join('\n') };
 };
 
-const streamResponses = async (response, res, stats, scope) => {
+const streamResponses = async (response, res, stats, scope, sessionKey) => {
   const reader = response.body?.getReader();
   if (!reader) {
     res.write(`event: error\ndata: ${JSON.stringify({ message: 'assistant stream failed' })}\n\n`);
@@ -280,6 +310,7 @@ const streamResponses = async (response, res, stats, scope) => {
   let buffer = '';
   let fullText = '';
   let usage = null;
+  let latestResponseId = null;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -295,6 +326,9 @@ const streamResponses = async (response, res, stats, scope) => {
       const { event, data } = parseSseChunk(chunk);
       if (!data) continue;
       if (data === '[DONE]') {
+        if (latestResponseId && sessionKey) {
+          setCachedPrefix(sessionKey, latestResponseId);
+        }
         res.write(
           `event: done\ndata: ${JSON.stringify({ answer: fullText, scope, stats })}\n\n`,
         );
@@ -309,6 +343,11 @@ const streamResponses = async (response, res, stats, scope) => {
         fullText += data;
         res.write(`data: ${JSON.stringify({ delta: data })}\n\n`);
         continue;
+      }
+
+      const responseId = extractResponseId(payload);
+      if (responseId) {
+        latestResponseId = responseId;
       }
 
       const eventType = event || payload?.type || '';
@@ -329,6 +368,10 @@ const streamResponses = async (response, res, stats, scope) => {
         }
       }
     }
+  }
+
+  if (latestResponseId && sessionKey) {
+    setCachedPrefix(sessionKey, latestResponseId);
   }
 
   res.write(
@@ -375,6 +418,10 @@ app.post('/assistant/answer', async (req, res) => {
     }
 
     const data = await response.json();
+    const responseId = extractResponseId(data);
+    if (responseId) {
+      setCachedPrefix(sessionKey, responseId);
+    }
     const answer = extractResponseText(data);
     const usage = extractUsage(data);
     return res.json({ answer, scope, stats, usage });
@@ -435,7 +482,7 @@ app.post('/assistant/answer/stream', async (req, res) => {
       return;
     }
 
-    await streamResponses(response, res, stats, scope);
+    await streamResponses(response, res, stats, scope, sessionKey);
   } catch (err) {
     console.error('[assistant] stream failed', err);
     if (isTimeoutError(err)) {
