@@ -156,7 +156,3 @@ docker compose up -d --build
 本项目基于 **GNU Affero General Public License v3.0 (AGPL-3.0-only)** 开源。
 
 如需商业授权或私有部署支持，请联系作者。
-
-```
-::contentReference[oaicite:0]{index=0}
-```
