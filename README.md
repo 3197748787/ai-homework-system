@@ -7,7 +7,7 @@
 
 ---
 
-## 为什么选择它（面向真实教学的“可落地”）
+## 为什么选择它——面向真实教学的“可落地”
 
 - **AI 先批、教师可控**：AI 输出“建议评分 + 依据”，教师一键采纳或调整，最终成绩由教师确认。
 - **全流程留痕可追溯**：作业发布后会固化题目/答案/细则快照，批改与发布过程可复盘、便于申诉处理。
@@ -55,21 +55,25 @@
 
 ---
 
-## 产品亮点（更“商业化”的能力表达）
+## 平台亮点
 
-### 1) 评分标准可复制：从“人治”到“有章可循”
+### 1) 价格低廉，功能丰富
+- 需昂贵的商业软件采购费用，即可获得完整的作业管理与 AI 批改能力。
+- 系统集成作业发布、AI 自动评分、教师复核、成绩统计、题库管理与教学助手等核心功能，帮助院系以更低成本实现教学数字化升级。
+  
+### 2) 评分标准可复制：从“人治”到“有章可循”
 - 支持将评分细则固化到作业快照，减少不同助教/不同批次的评分漂移
 - AI 输出结构化建议，降低复核时间成本
 
-### 2) 过程管理可视化：交没交、批没批、发没发，一眼看懂
+### 3) 过程管理可视化：交没交、批没批、发没发，一眼看懂
 - 缺交名单、提交进度、批改状态统一呈现
 - 成绩发布与学生可见策略可控（是否可看答案/分数等）
 
-### 3) 题库资产化：从“临时出题”到“内容资产沉淀”
+### 4) 题库资产化：从“临时出题”到“内容资产沉淀”
 - 教材-章节-题目树结构，支持多题型
 - 题库按学校授权范围治理，适合校内/跨校协作与内容运营
 
-### 4) AI 助手：把“查数据、做汇总”变成对话
+### 5) AI 助手：把“查数据、做汇总”变成对话
 - 教师：快速了解班级成绩概况、作业完成情况、学生分布
 - 学生：针对作业与课程内容进行学习问答与复盘
 
@@ -90,11 +94,11 @@
   <img width="49%" alt="assistant" src="https://github.com/user-attachments/assets/9813f5f4-4731-4034-a179-6522445c9a33" />
 </p>
 
-> 更多截图见仓库页面底部（或 Issues/Discussion 可申请演示账号）。
+> 更多功能与内容欢迎联系我们，获取试用账号与免费群体使用。
 
 ---
 
-## 试用与部署（给非技术同学的版本）
+## 试用与部署
 
 你可以把它当作一个“学校内部系统”来部署：  
 - **默认支持私有化部署**（数据在校内/你自己的服务器）
@@ -113,7 +117,7 @@ docker compose up -d --build
 
 ---
 
-## 商业合作｜院系/学校定制（推荐）
+## 商业合作｜院系/学校定制
 
 如果你希望在院系/学校落地（试点/推广），我们可以提供：
 
@@ -124,3 +128,15 @@ docker compose up -d --build
 
 **联系：微信 `zcy2813994715`**
 支持：**免费试用沟通｜院系/学校定制｜私有化落地**
+
+---
+
+## License
+
+This project is licensed under **GNU Affero General Public License v3.0 (AGPL-3.0-only)**.
+
+- You can use, modify, and deploy this software.
+- If you run a modified version as a network service, you must provide the corresponding source code to the users of that service (AGPLv3 §13).
+- **Commercial licensing** is available for institutions that need proprietary deployment or cannot comply with AGPL requirements.
+
+Contact (Commercial License / Private Deployment): WeChat **zcy2813994715**
