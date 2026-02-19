@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN pip3 install --no-cache-dir -r ai_worker/requirements.txt
+RUN pip3 install --no-cache-dir --break-system-packages -r ai_worker/requirements.txt
 
 RUN npm run build
 

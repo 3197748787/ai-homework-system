@@ -489,7 +489,7 @@ def main() -> int:
         or os.getenv("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
         or os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
     )
-    model = args.model or os.getenv("ARK_MODEL", "doubao-seed-1-8-251228")
+    model = args.model or os.getenv("ARK_MODEL", "doubao-seed-2-0-mini-260215")
 
     json_payload = load_json_payload(args.json)
     if not isinstance(json_payload, dict):

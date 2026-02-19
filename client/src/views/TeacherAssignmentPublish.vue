@@ -22,6 +22,7 @@
         <button class="step-item" :class="{ active: step === 1 }" @click="step = 1">
           1. 作业信息
         </button>
+        <span class="step-arrow" aria-hidden="true">→</span>
         <button
           class="step-item"
           :class="{ active: step === 2 }"
@@ -30,6 +31,7 @@
         >
           2. 题库筛选
         </button>
+        <span class="step-arrow" aria-hidden="true">→</span>
         <button
           class="step-item"
           :class="{ active: step === 3 }"
@@ -1071,11 +1073,15 @@ const handlePublish = async () => {
 
 .stepper {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
 
 .step-item {
+  flex: 0 0 auto;
   border: none;
   padding: 8px 14px;
   border-radius: 999px;
@@ -1093,6 +1099,14 @@ const handlePublish = async () => {
 .step-item:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.step-arrow {
+  flex: 0 0 auto;
+  color: rgba(26, 29, 51, 0.45);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .step-actions {

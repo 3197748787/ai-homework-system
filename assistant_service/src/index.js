@@ -3,7 +3,7 @@ import express from 'express';
 
 const {
   ASSISTANT_PORT = 4100,
-  ASSISTANT_MODEL = 'doubao-seed-1-8-251228',
+  ASSISTANT_MODEL = 'doubao-seed-2-0-mini-260215',
   ASSISTANT_BASE_URL = 'https://ark.cn-beijing.volces.com/api/v3',
   ASSISTANT_ASSET_BASE = 'http://localhost:3000',
   ARK_API_KEY = '',

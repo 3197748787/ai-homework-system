@@ -54,7 +54,6 @@
               >
                 {{ retryingIds.has(task.id) ? '重试中...' : `重试失败(${task.aiFailedCount})` }}
               </button>
-              <button class="task-action" @click="goSubmissions(task.id)">查看提交</button>
               <button
                 class="task-action ghost"
                 type="button"
@@ -63,6 +62,7 @@
               >
                 {{ deletingIds.has(task.id) ? '删除中...' : '删除作业' }}
               </button>
+              <button class="task-action" @click="goSubmissions(task.id)">查看提交</button>
             </div>
           </div>
         </div>
